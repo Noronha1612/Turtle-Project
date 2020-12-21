@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { celebrate, Joi } from 'celebrate';
 
+import { encryptItem } from './utils/encryptItem';
+
 const routes = Router();
 
 routes.get('/', (request, response) => {
