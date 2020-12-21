@@ -45,8 +45,10 @@ export default class UsersController {
 
         const encryptedPassword = encryptItem(data.password);
 
-        if ( encryptedPassword.error ) 
+        if ( encryptedPassword.error ) {
+            await trx.rollback();
             return response.status(500).json({ error: true, message: 'Internal Server Error' });
+        }
         
         data.password = encryptedPassword.item as string;
 
