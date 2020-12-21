@@ -3,10 +3,12 @@ import { celebrate, Joi } from 'celebrate';
 
 import { encryptItem } from './utils/encryptItem';
 
+import UsersController from './controllers/UsersController';
+
+const usersController = new UsersController();
+
 const routes = Router();
 
-routes.get('/', (request, response) => {
-    return response.status(200).json({ message: 'All right' });
-});
+routes.get('/users', usersController.index);
 
 export default routes;
