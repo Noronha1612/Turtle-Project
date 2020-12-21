@@ -14,9 +14,5 @@ export function encryptItem(item: string) {
 
     const encryptedItem = cipher.update(item);
 
-    console.log(encryptedItem.toString('hex'));
-}
-
-export function decryptItem() {
-
+    return encryptedItem.toString('hex');
 }
