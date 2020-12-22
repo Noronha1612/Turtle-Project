@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import db from '../database/database';
 
-import { UserBodyRegister } from '../models/user';
+import { UserBodyRegister, UserResponse } from '../models/user';
 
 import checkIfUserExist from '../utils/checkIfUserExist';
 import checkValidDate from '../utils/checkValidDate';
@@ -10,7 +10,27 @@ import generateToken from '../utils/generateToken';
 
 export default class UsersController {
     async index(request: Request, response: Response) {
-        
+        const { ids } = request.headers as { ids: string | undefined };
+
+        if( !ids ) return response.status(404).json({ error: true, message: 'Ids not found' });
+
+        const idList = ids.split(',');
+
+        const dbResponse = await db('users')
+            .select('*')
+            .whereIn('id', idList) as UserResponse[] | undefined;
+
+        const filteredResponse = dbResponse?.map( user => ({
+            name: user.name,
+            nickname: user.nickname,
+            whatsapp: user.whatsapp,
+            city: user.city,
+            email: user.email,
+            avatar_id: user.avatar_id,
+            birthday: user.birthday
+        }));
+
+        return response.status(200).json({ error: false, data: filteredResponse ? filteredResponse : [] });
     }
 
     async create(request: Request, response: Response) {
