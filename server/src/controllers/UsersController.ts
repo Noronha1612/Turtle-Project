@@ -1,12 +1,16 @@
 import { Request, Response } from 'express';
 import db from '../database/database';
 
-import { UserBodyRegister, UserResponse } from '../models/user';
+import { UserBodyGeneric, UserBodyRegister, UserResponse } from '../models/user';
 
 import checkIfUserExist from '../utils/checkIfUserExist';
 import checkValidDate from '../utils/checkValidDate';
 import { encryptItem } from '../utils/encryptItem';
 import generateToken from '../utils/generateToken';
+
+interface IGivenData extends UserBodyGeneric {
+    id: number
+}
 
 export default class UsersController {
     async index(request: Request, response: Response) {
@@ -92,5 +96,15 @@ export default class UsersController {
         await trx.commit();
 
         return response.status(200).json({ error: false, token});
+    }
+
+    async updateGenericData(request: Request, response: Response) {
+        const { id, ...givenData } = request.body as IGivenData;
+
+        await db('users')
+            .update(givenData)
+            .where({ id });
+
+        return response.status(200).json({ error: false, data: givenData });
     }
 }
