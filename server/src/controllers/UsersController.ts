@@ -14,17 +14,15 @@ interface IGivenData extends UserBodyGeneric {
 
 export default class UsersController {
     async index(request: Request, response: Response) {
-        const { ids } = request.headers as { ids: string | undefined };
-
-        if( !ids ) return response.status(404).json({ error: true, message: 'Ids not found' });
+        const { ids } = request.headers as { ids: string };
 
         const idList = ids.split(',');
 
         const dbResponse = await db('users')
             .select('*')
-            .whereIn('id', idList) as UserResponse[] | undefined;
+            .whereIn('id', idList) as UserResponse[];
 
-        const filteredResponse = dbResponse?.map( user => ({
+        const filteredResponse = dbResponse.map( user => ({
             name: user.name,
             nickname: user.nickname,
             whatsapp: user.whatsapp,
