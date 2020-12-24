@@ -39,4 +39,14 @@ routes.put('/users', celebrate({
     })
 }), usersController.updateGenericData);
 
+routes.put('/users/password', celebrate({
+    body: Joi.object({
+        newPassword: Joi.string().required(),
+        confirmNewPassword: Joi.string().required()
+    }),
+    headers: Joi.object({
+        user_id: Joi.string().required()
+    }).options({ allowUnknown: true })
+}), usersController.updatePassword);
+
 export default routes;

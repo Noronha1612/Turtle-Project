@@ -107,6 +107,29 @@ export default class UsersController {
     }
 
     async updatePassword(request: Request, response: Response) {
+        const { newPassword, confirmNewPassword } = request.body;
+        const { user_id } = request.headers;
+
+        if ( newPassword !== confirmNewPassword ) 
+            return response.status(403).json({ error: true, message: 'Passwords do not match' });
         
+        if ( newPassword.length < 3 || !newPassword )
+            return response.status(403).json({ error: true, message: 'Invalid password' });
+            
+        const { item: encryptedNewPassword } = encryptItem(newPassword); 
+
+        const {password: previousPassword} = await db('users')
+            .select('password')
+            .where({ id: user_id })
+            .first();
+        
+        if ( encryptedNewPassword === previousPassword )
+            return response.status(403).json({ error: true, message: 'The password must not be equal to the previous one' })
+
+        await db('users')
+            .update({ password: encryptedNewPassword })
+            .where({ id: user_id });
+
+        return response.status(200).json({ error: false, data:[{ userId: user_id }] });
     }
 }
