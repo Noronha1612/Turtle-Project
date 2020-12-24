@@ -105,4 +105,8 @@ export default class UsersController {
 
         return response.status(200).json({ error: false, data: givenData });
     }
+
+    async updatePassword(request: Request, response: Response) {
+        
+    }
 }
