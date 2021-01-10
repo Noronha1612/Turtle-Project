@@ -1,11 +1,8 @@
 import { Request, Response } from 'express';
 import db from '../database/database';
 
-import { UserBodyGeneric, UserBodyRegister, UserResponse } from '../models/user';
-
-import checkIfUserExist from '../utils/checkIfUserExist';
-import checkValidDate from '../utils/checkValidDate';
-import { encryptItem } from '../utils/encryptItem';
+import { UserBodyGeneric, UserBodyRegister, UserResponse } from '../models/interfaces/user';
+import User from '../models/userModel';
 import generateToken from '../utils/generateToken';
 
 interface IGivenData extends UserBodyGeneric {
@@ -36,62 +33,14 @@ export default class UsersController {
     }
 
     async create(request: Request, response: Response) {
-        const trx = await db.transaction();
+        const userToBeInserted = new User(null);
 
-        const data: UserBodyRegister = request.body;
-
-        if ( !checkValidDate(data.birthday) ) {
-            await trx.rollback();
-            return response.status(400).json({ error: true, message: 'Invalid birthday' });
-        }
-        if ( !data.email.includes('@') ) {
-            await trx.rollback();
-            return response.status(400).json({ error: true, message: 'Invalid email' });
-        }
-        if ( data.name.length < 3 && data.name.split(' ').length < 2 ) {
-            await trx.rollback();
-            return response.status(400).json({ error: true, message: 'Invalid full name' });
-        }
-        if ( data.password.length < 6 ) {
-            await trx.rollback();
-            return response.status(400).json({ error: true, message: 'Password too short' });
-        }
-        if ( data.whatsapp.length !== 12 ) {
-            await trx.rollback();
-            return response.status(400).json({ error: true, message: 'Invalid whatsapp' });
-        }
-        if ( await checkIfUserExist(data.email, data.whatsapp) ) {
-            await trx.rollback();
-            return response.status(401).json({ error: true, message: 'User already exist' });
-        }
-
-        const encryptedPassword = encryptItem(data.password);
-
-        if ( encryptedPassword.error ) {
-            await trx.rollback();
-            return response.status(500).json({ error: true, message: 'Internal Server Error' });
-        }
-        
-        data.password = encryptedPassword.item as string;
-
-        const formattedDate = data.birthday.split('/').reverse().join('-'); // [ 12, 08, 2000 ]
-
-        data.birthday = formattedDate;
-
-        await trx('users').insert(data);
-
-        const userId = await trx('users')
-            .select('id')
-            .where({ email: data.email })
-            .first();
+        userToBeInserted.insertIntoDB(request.body);
 
         const token = generateToken({
-            id: userId.id,
-            nickname: data.nickname,
-            avatar_id: data.avatar_id
-        });
-
-        await trx.commit();
+            id: userToBeInserted.getUserId(),
+            nickname: 
+        })
 
         return response.status(200).json({ error: false, token});
     }
