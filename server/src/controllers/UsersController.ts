@@ -1,13 +1,9 @@
 import { Request, Response } from 'express';
 import db from '../database/database';
 
-import { UserBodyGeneric, UserBodyRegister, UserResponse } from '../models/interfaces/user';
+import { UserBodyGeneric, UserBodyRegister, UserResponse } from '../models/interfaces/IUser';
 import User from '../models/userModel';
 import generateToken from '../utils/generateToken';
-
-interface IGivenData extends UserBodyGeneric {
-    id: number
-}
 
 export default class UsersController {
     async index(request: Request, response: Response) {
@@ -39,10 +35,11 @@ export default class UsersController {
 
         const token = generateToken({
             id: userToBeInserted.getUserId(),
-            nickname: 
+            nickname: userToBeInserted.getUsetBody()?.nickname,
+            avatar_id: userToBeInserted.getUsetBody()?.avatar_id
         })
 
-        return response.status(200).json({ error: false, token});
+        return response.status(200).json({ error: false, token });
     }
 
     async updateGenericData(request: Request, response: Response) {

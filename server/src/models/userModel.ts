@@ -7,6 +7,11 @@ import generateToken from '../utils/generateToken';
 
 import responseCodes from '../utils/responseCodes';
 import checkIfUserExist from "../utils/checkIfUserExist";
+import { response } from "express";
+
+interface IGivenData extends UserBodyGeneric {
+    id: number
+}
 
 export default class User {
     private userId: string | null;
@@ -111,7 +116,7 @@ export default class User {
     
             await trx.commit();
     
-            return responseCodes.OK;
+            return responseCodes.CREATED;
         }
         catch(error) {
             await trx.rollback();
@@ -119,7 +124,18 @@ export default class User {
         }
     }
 
-    
+    async updateGenericData(data: IGivenData) {
+        try {
+            await db('users')
+                .update(data)
+                .where({ id: this.getUserId() });
+
+            return responseCodes.ACCEPTED;
+        } catch (err) {
+            return responseCodes.INTERNAL_SERVER_ERROR;
+        }
+    }
+
     public getUserId(): string | null {
         return this.userId;
     }
