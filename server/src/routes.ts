@@ -28,6 +28,8 @@ routes.post('/users', celebrate({
     })
 }), usersController.create);
 
+routes.post('/users/sendCodeEmail', usersController.sendAuthCode);
+
 routes.put('/users', celebrate({
     body: Joi.object({
         id: Joi.number().required(),

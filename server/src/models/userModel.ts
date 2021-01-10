@@ -1,12 +1,16 @@
 import { UserBodyGeneric, UserBodyRegister, UserResponse } from "./interfaces/IUser";
 import db from '../database/database';
+import handlebars from 'handlebars';
+import fs from 'fs';
+import path from 'path';
 
 import checkValidDate from '../utils/checkValidDate';
 import { encryptItem } from '../utils/encryptItem';
-import generateToken from '../utils/generateToken';
-
 import responseCodes from '../utils/responseCodes';
 import checkIfUserExist from "../utils/checkIfUserExist";
+
+import sendEmail from '../services/sendEmail';
+import generateAuthCode from "../utils/generateAuthCode";
 import { response } from "express";
 
 interface IGivenData extends UserBodyGeneric {
@@ -21,20 +25,11 @@ export default class User {
         this.userId = userId;
 
         if ( !this.userId ) this.userBody = undefined;
-        else {
-            Promise.resolve(this.searchUserBody()).then(
-                result => this.userBody = result
-            );
-        }
+        else this.setUserBody();
     }
 
-    async searchUserBody(): Promise<UserResponse | undefined> {
-        function formatDate(date: string): string {
-            // Receives "2002-12-16"
-            return date.split('-').reverse().join("/");
-        }
-
-        const response = await this.searchByID(this.getUserId() as string, 
+    async setUserBody() {
+        const response = await this.searchByID( 
             "name",
             "nickname",
             "whatsapp",
@@ -44,13 +39,7 @@ export default class User {
             "birthday"
         );
 
-        const reworkedData = { ...response };
-
-        if ( response ){    
-            reworkedData.birthday = formatDate(reworkedData.birthday);
-        } else return undefined;
-
-        return reworkedData as UserResponse;
+        this.userBody = response;
     }
 
     async searchByID(...fields: string[]): Promise<UserResponse | undefined> {
@@ -164,11 +153,36 @@ export default class User {
         }
     }
 
+    async sendCodeEmail() {
+        if ( this.userBody ) {
+            try {
+                process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+
+                const htmlPath = path.resolve(__dirname, "..", "services", "sendEmail", "template.html");
+                const source = fs.readFileSync(htmlPath, 'utf-8').toString();
+                const template = handlebars.compile(source);
+                const replacements = { authCode: generateAuthCode() }
+                const htmlToSend = template(replacements);
+
+                sendEmail(
+                    ['Auth Code', htmlToSend],
+                    this.userBody.email,
+                    "noreply@feetsupport.com"
+                );
+
+                return responseCodes.OK;
+            } catch (err) {
+                console.log(err);
+                return responseCodes.INTERNAL_SERVER_ERROR;
+            }
+        } else return responseCodes.INTERNAL_SERVER_ERROR;
+    }
+
     public getUserId(): string | null {
         return this.userId;
     }
 
-    public getUsetBody(): UserBodyGeneric | undefined {
+    public getUserBody(): UserBodyGeneric | undefined {
         return this.userBody;
     }
     

@@ -3,6 +3,7 @@ import nodemailer from 'nodemailer';
 config();
 
 export default async function sendEmail([subject, mainHTML]: [string, string], to: string, from: string) {
+
     const transporter = nodemailer.createTransport({
         host: 'smtp-relay.sendinblue.com',
         port: 587,

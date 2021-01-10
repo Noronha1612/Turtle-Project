@@ -5,13 +5,14 @@ export interface UserBodyGeneric {
     city: string;
     email: string;
     avatar_id: number;
-    birthday: string;
 }
 
 export interface UserBodyRegister extends UserBodyGeneric {
     password: string;
+    birthday: string;
 }
 
 export interface UserResponse extends UserBodyGeneric {
     id: number;
+    birthday: Date;
 }
