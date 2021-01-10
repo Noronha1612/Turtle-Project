@@ -4,6 +4,7 @@ import db from '../database/database';
 import { UserBodyGeneric, UserBodyRegister, UserResponse } from '../models/interfaces/IUser';
 import User from '../models/userModel';
 import generateToken from '../utils/generateToken';
+import responseCodes from '../utils/responseCodes';
 
 export default class UsersController {
     async index(request: Request, response: Response) {
@@ -31,7 +32,7 @@ export default class UsersController {
     async create(request: Request, response: Response) {
         const userToBeInserted = new User(null);
 
-        userToBeInserted.insertIntoDB(request.body);
+        const responseCode = await userToBeInserted.insertIntoDB(request.body);
 
         const token = generateToken({
             id: userToBeInserted.getUserId(),
@@ -39,15 +40,13 @@ export default class UsersController {
             avatar_id: userToBeInserted.getUsetBody()?.avatar_id
         })
 
-        return response.status(200).json({ error: false, token });
+        return response.status(responseCode).json({ error: false, token });
     }
 
     async updateGenericData(request: Request, response: Response) {
-        const { id, ...givenData } = request.body as IGivenData;
+        const { id, ...givenData } = request.body;
 
-        await db('users')
-            .update(givenData)
-            .where({ id });
+        const responseCode = await new User(id).updateGenericData(givenData);
 
         return response.status(200).json({ error: false, data: givenData });
     }
