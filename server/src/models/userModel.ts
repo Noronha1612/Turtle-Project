@@ -136,6 +136,34 @@ export default class User {
         }
     }
 
+    async updatePassword(newPassword: string, confirmNewPassword: string): Promise<responseCodes> {
+        try {
+            if ( newPassword !== confirmNewPassword ) 
+                return responseCodes.FORBIDDEN;
+            
+            if ( newPassword.length < 3 || !newPassword )
+                return responseCodes.FORBIDDEN;
+                
+            const { item: encryptedNewPassword } = encryptItem(newPassword); 
+
+            const {password: previousPassword} = await db('users')
+                .select('password')
+                .where({ id: this.getUserId() })
+                .first();
+            
+            if ( encryptedNewPassword === previousPassword )
+                return responseCodes.FORBIDDEN;
+
+            await db('users')
+                .update({ password: encryptedNewPassword })
+                .where({ id: this.getUserId() });
+
+            return responseCodes.ACCEPTED;
+        } catch(err) {
+            return responseCodes.INTERNAL_SERVER_ERROR;
+        }
+    }
+
     public getUserId(): string | null {
         return this.userId;
     }
