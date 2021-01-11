@@ -3,7 +3,7 @@ import db from '../database/database';
 
 import { UserBodyGeneric, UserBodyRegister, UserResponse } from '../models/interfaces/IUser';
 import User from '../models/userModel';
-import sendEmail from '../services/sendEmail';
+import { encryptItem } from '../utils/encryptItem';
 import generateToken from '../utils/generateToken';
 import responseCodes from '../utils/responseCodes';
 
@@ -68,14 +68,16 @@ export default class UsersController {
         const user = new User(user_id);
         await user.setUserBody();
 
-        const responseCode = await user.sendCodeEmail();
+        const [responseCode, code] = await user.sendCodeEmail();
+
+        if ( responseCode !== responseCodes.OK ) return response.status(responseCode as responseCodes).json({ error: true });
 
         const token = generateToken({
             exp: Date.now() + (1000 * 60 * 60),
-            email: user.getUserBody()?.email
+            email: user.getUserBody()?.email,
+            code: encryptItem(code as string)
         });
 
-        if ( responseCode === responseCodes.OK ) return response.status(responseCode).json({ error: false, token });
-        else return response.status(responseCode).json({ error: true });
+        return response.status(responseCode).json({ error: false, token });
     }
 }

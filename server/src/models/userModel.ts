@@ -29,6 +29,8 @@ export default class User {
     }
 
     async setUserBody() {
+        if ( this.userBody ) return;
+
         const response = await this.searchByID( 
             "name",
             "nickname",
@@ -156,12 +158,14 @@ export default class User {
     async sendCodeEmail() {
         if ( this.userBody ) {
             try {
+                const code = generateAuthCode();
+
                 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
                 const htmlPath = path.resolve(__dirname, "..", "services", "sendEmail", "template.html");
                 const source = fs.readFileSync(htmlPath, 'utf-8').toString();
                 const template = handlebars.compile(source);
-                const replacements = { authCode: generateAuthCode() }
+                const replacements = { authCode: code }
                 const htmlToSend = template(replacements);
 
                 sendEmail(
@@ -170,12 +174,12 @@ export default class User {
                     "noreply@feetsupport.com"
                 );
 
-                return responseCodes.OK;
+                return [responseCodes.OK, code];
             } catch (err) {
                 console.log(err);
-                return responseCodes.INTERNAL_SERVER_ERROR;
+                return [responseCodes.INTERNAL_SERVER_ERROR];
             }
-        } else return responseCodes.INTERNAL_SERVER_ERROR;
+        } else return [responseCodes.INTERNAL_SERVER_ERROR];
     }
 
     public getUserId(): string | null {
