@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { celebrate, Joi } from 'celebrate';
 
-import { encryptItem } from './utils/encryptItem';
-
 import UsersController from './controllers/UsersController';
+import ServicesController from './controllers/ServicesController';
 
 const usersController = new UsersController();
+const servicesController = new ServicesController();
 
 const routes = Router();
 
@@ -50,5 +50,7 @@ routes.put('/users/password', celebrate({
         user_id: Joi.string().required()
     }).options({ allowUnknown: true })
 }), usersController.updatePassword);
+
+routes.post('/services/encrypt', servicesController.encrypt);
 
 export default routes;
