@@ -28,7 +28,11 @@ routes.post('/users', celebrate({
     })
 }), usersController.create);
 
-routes.post('/users/sendCodeEmail', usersController.sendAuthCode);
+routes.post('/users/sendCodeEmail', celebrate({
+    headers: Joi.object({
+        user_id: Joi.string().required()
+    }).options({ allowUnknown: true })
+}), usersController.sendAuthCode);
 
 routes.put('/users', celebrate({
     body: Joi.object({
