@@ -19,7 +19,7 @@ interface IGivenData extends UserBodyGeneric {
 
 export default class User {
     private userId: string | null;
-    private userBody: UserBodyGeneric | undefined;
+    private userBody: UserResponse | undefined;
 
     constructor(userId: string | null) {
         this.userId = userId;
@@ -186,7 +186,7 @@ export default class User {
         return this.userId;
     }
 
-    public getUserBody(): UserBodyGeneric | undefined {
+    public getUserBody(): UserResponse | undefined {
         return this.userBody;
     }
     

@@ -13,20 +13,22 @@ export default class UsersController {
 
         const idList = ids.split(',');
 
-        const dbResponse = await db('users')
-            .select('*')
-            .whereIn('id', idList) as UserResponse[];
+        const usersBodies = idList.map( id => new User(id));
 
-        const filteredResponse = dbResponse.map( user => ({
-            id: user.id,
-            name: user.name,
-            nickname: user.nickname,
-            whatsapp: user.whatsapp,
-            city: user.city,
-            email: user.email,
-            avatar_id: user.avatar_id,
-            birthday: user.birthday
-        }));
+        const filteredResponse = usersBodies.map( async user => {
+            const userBody = await Promise.resolve(user.getUserBody());
+
+            return {
+                id: user.getUserId(),
+                name: userBody?.name,
+                nickname: userBody?.nickname,
+                whatsapp: userBody?.whatsapp,
+                city: userBody?.city,
+                email: userBody?.email,
+                avatar_id: userBody?.avatar_id,
+                birthday: userBody?.birthday
+            }
+        });
 
         return response.status(200).json({ error: false, data: filteredResponse ? filteredResponse : [] });
     }

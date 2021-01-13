@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=test jest",
-    "test_win": "SET NODE_ENV=test & jest",
+    "test": "jest --detectOpenHandles",
     "test_knex:migrate": "knex NODE_ENV=test --knexfile knexfile.ts migrate:latest",
     "dev": "tsnd --ignore-watch node_modules --ignore __test__ src/server.ts",
     "knex:migrate": "knex --knexfile knexfile.ts migrate:latest",
@@ -28,9 +27,11 @@
   "devDependencies": {
     "@types/cors": "^2.8.9",
     "@types/express": "^4.17.9",
+    "@types/faker": "^5.1.5",
     "@types/jest": "^26.0.20",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/nodemailer": "^6.4.0",
+    "faker": "^5.1.0",
     "jest": "^26.6.3",
     "ts-jest": "^26.4.4",
     "ts-node-dev": "^1.1.1",
