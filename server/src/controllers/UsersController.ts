@@ -50,7 +50,9 @@ export default class UsersController {
 
         const responseCode = await new User(id).updateGenericData(givenData);
 
-        return response.status(responseCode).json({ error: false, data: givenData });
+        const token = generateToken(givenData)
+
+        return response.status(responseCode).json({ error: false, token });
     }
 
     async updatePassword(request: Request, response: Response) {

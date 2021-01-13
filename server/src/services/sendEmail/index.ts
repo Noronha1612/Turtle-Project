@@ -1,6 +1,4 @@
-import { config } from 'dotenv';
 import nodemailer from 'nodemailer';
-config();
 
 export default async function sendEmail([subject, mainHTML]: [string, string], to: string, from: string) {
 

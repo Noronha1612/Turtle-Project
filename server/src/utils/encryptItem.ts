@@ -1,7 +1,4 @@
 import crypto from 'crypto';
-import { config } from 'dotenv';
-
-config();
 
 export function encryptItem(item: string) {
     const cryptoKey = process.env.CRYPTO_KEY;

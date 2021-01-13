@@ -37,11 +37,11 @@ routes.post('/users/sendCodeEmail', celebrate({
 routes.put('/users', celebrate({
     body: Joi.object({
         id: Joi.number().required(),
-        name: Joi.string().required(),
-        whatsapp: Joi.string().required(),
-        city: Joi.string().required(),
-        email: Joi.string().required(),
-        avatar_id: Joi.number().required()
+        name: Joi.string(),
+        whatsapp: Joi.string(),
+        city: Joi.string(),
+        email: Joi.string(),
+        avatar_id: Joi.number()
     })
 }), usersController.updateGenericData);
 
